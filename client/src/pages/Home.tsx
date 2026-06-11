@@ -10,10 +10,11 @@ import Navbar from '../components/Navbar'
 type Position = 'FWD' | 'MID' | 'DEF' | 'GK'
 
 interface Player {
-  id: number
+  id: string  // ← string UUID
   name: string
   position: Position
   country: string
+  country_code: string
 }
 
 interface Squad {
@@ -26,23 +27,23 @@ interface Squad {
 const MOCK_SQUAD: Squad = {
   teamName: 'Sujal FC',
   starters: [
-    { id: 1,  name: 'C. Ronaldo',   position: 'FWD', country: 'PT' },
-    { id: 2,  name: 'K. Mbappé',    position: 'FWD', country: 'FR' },
-    { id: 3,  name: 'H. Kane',      position: 'FWD', country: 'EN' },
-    { id: 4,  name: 'K. De Bruyne', position: 'MID', country: 'BE' },
-    { id: 5,  name: 'L. Modric',    position: 'MID', country: 'HR' },
-    { id: 6,  name: 'B. Fernandes', position: 'MID', country: 'PT' },
-    { id: 7,  name: 'P. Foden',     position: 'MID', country: 'EN' },
-    { id: 8,  name: 'V. van Dijk',  position: 'DEF', country: 'NL' },
-    { id: 9,  name: 'A. Robertson', position: 'DEF', country: 'SC' },
-    { id: 10, name: 'R. Dias',      position: 'DEF', country: 'PT' },
-    { id: 11, name: 'A. Onana',     position: 'GK',  country: 'CM' },
+    { id: '1',  name: 'C. Ronaldo',   position: 'FWD', country: 'Portugal', country_code: 'PT' },
+    { id: '2',  name: 'K. Mbappé',    position: 'FWD', country: 'France', country_code: 'FR' },
+    { id: '3',  name: 'H. Kane',      position: 'FWD', country: 'England', country_code: 'EN' },
+    { id: '4',  name: 'K. De Bruyne', position: 'MID', country: 'Belgium', country_code: 'BE' },
+    { id: '5',  name: 'L. Modric',    position: 'MID', country: 'Croatia', country_code: 'HR' },
+    { id: '6',  name: 'B. Fernandes', position: 'MID', country: 'Portugal', country_code: 'PT' },
+    { id: '7',  name: 'P. Foden',     position: 'MID', country: 'England', country_code: 'EN' },
+    { id: '8',  name: 'V. van Dijk',  position: 'DEF', country: 'Netherlands', country_code: 'NL' },
+    { id: '9',  name: 'A. Robertson', position: 'DEF', country: 'Scotland', country_code: 'SC' },
+    { id: '10', name: 'R. Dias',      position: 'DEF', country: 'Portugal', country_code: 'PT' },
+    { id: '11', name: 'A. Onana',     position: 'GK',  country: 'Cameroon', country_code: 'CM' },
   ],
   bench: [
-    { id: 12, name: 'L. Messi',    position: 'FWD', country: 'AR' },
-    { id: 13, name: 'T. Kroos',    position: 'MID', country: 'DE' },
-    { id: 14, name: 'M. Acerbi',   position: 'DEF', country: 'IT' },
-    { id: 15, name: 'T. Courtois', position: 'GK',  country: 'BE' },
+    { id: '12', name: 'L. Messi',    position: 'FWD', country: 'Argentina', country_code: 'AR' },
+    { id: '13', name: 'T. Kroos',    position: 'MID', country: 'Germany', country_code: 'DE' },
+    { id: '14', name: 'M. Acerbi',   position: 'DEF', country: 'Italy', country_code: 'IT' },
+    { id: '15', name: 'T. Courtois', position: 'GK',  country: 'Belgium', country_code: 'BE' },
   ],
 }
 
@@ -120,43 +121,88 @@ export default function Home() {
   const [squad, setSquad]         = useState<Squad | null>(null)
   const [loading, setLoading]     = useState(true)
   const [swapMode, setSwapMode]   = useState(false)
-  const [swapFirst, setSwapFirst] = useState<number | null>(null)
+const [swapFirst, setSwapFirst] = useState<{ id: string; isBench: boolean } | null>(null)
 
   const user = JSON.parse(localStorage.getItem('user') || '{}')
 
-  useEffect(() => {
-    const fetchSquad = async () => {
-      try {
-        const res = await api.get('/team/my-team')
-        setSquad(res.data)
-      } catch {
-        setSquad(MOCK_SQUAD)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchSquad()
-  }, [])
-
-  const handlePlayerClick = (playerId: number) => {
-    if (!swapMode) return
-    if (swapFirst === null) {
-      setSwapFirst(playerId)
-    } else {
-      setSquad(prev => {
-        if (!prev) return prev
-        const newStarters = [...prev.starters]
-        const i = newStarters.findIndex(p => p.id === swapFirst)
-        const j = newStarters.findIndex(p => p.id === playerId)
-        if (i !== -1 && j !== -1) {
-          ;[newStarters[i], newStarters[j]] = [newStarters[j], newStarters[i]]
-        }
-        return { ...prev, starters: newStarters }
+useEffect(() => {
+  const fetchSquad = async () => {
+    try {
+      const res = await api.get('/team')
+      console.log('API response:', res.data)
+console.log('players:', res.data.players)
+      // Backend returns { team: {...}, players: [...] }
+      const makePlayer = (p: any) => ({
+        id: p.player_id,
+        name: p.name,
+        position: p.position,
+        country: p.country,
+        country_code: p.country_code || String(p.country || '').slice(0, 2).toUpperCase(),
       })
-      setSwapFirst(null)
-      setSwapMode(false)
+
+      const starters = res.data.players
+        .filter((p: any) => !p.is_on_bench)
+        .map(makePlayer)
+      const bench = res.data.players
+        .filter((p: any) => p.is_on_bench)
+        .map(makePlayer)
+      setSquad({
+        teamName: res.data.team.name,
+        starters,
+        bench,
+      })
+    } catch {
+      setSquad(MOCK_SQUAD)
+    } finally {
+      setLoading(false)
     }
   }
+  fetchSquad()
+}, [])
+
+const handlePlayerClick = (playerId: string, isBench = false) => {
+  if (!swapMode) return
+
+  if (swapFirst === null) {
+    setSwapFirst({ id: playerId, isBench })
+    return
+  }
+
+  setSquad(prev => {
+    if (!prev) return prev
+    const newStarters = [...prev.starters]
+    const newBench    = [...prev.bench]
+    const firstId    = swapFirst.id
+    const firstBench = swapFirst.isBench
+
+    if (!firstBench && !isBench) {
+      // starter ↔ starter
+      const i = newStarters.findIndex(p => p.id === firstId)
+      const j = newStarters.findIndex(p => p.id === playerId)
+      if (i !== -1 && j !== -1)
+        [newStarters[i], newStarters[j]] = [newStarters[j], newStarters[i]]
+
+    } else if (firstBench && !isBench) {
+      // bench → starter (same position only)
+      const bi = newBench.findIndex(p => p.id === firstId)
+      const si = newStarters.findIndex(p => p.id === playerId)
+      if (bi !== -1 && si !== -1 && newBench[bi].position === newStarters[si].position)
+        [newBench[bi], newStarters[si]] = [newStarters[si], newBench[bi]]
+
+    } else if (!firstBench && isBench) {
+      // starter → bench (same position only)
+      const si = newStarters.findIndex(p => p.id === firstId)
+      const bi = newBench.findIndex(p => p.id === playerId)
+      if (si !== -1 && bi !== -1 && newStarters[si].position === newBench[bi].position)
+        [newStarters[si], newBench[bi]] = [newBench[bi], newStarters[si]]
+    }
+
+    return { ...prev, starters: newStarters, bench: newBench }
+  })
+
+  setSwapFirst(null)
+  setSwapMode(false)
+}
 
   if (loading) {
     return (
@@ -180,7 +226,7 @@ export default function Home() {
 
       {/* ── Header ── */}
       <div className="flex items-center justify-between px-4 pt-6 pb-4">
-        <h1 className="text-[26px] font-bold text-black">
+        <h1 className="text-[26px] font-semibold text-black">
           Hi, {user?.username || 'Manager'}
         </h1>
         <button
@@ -214,8 +260,8 @@ export default function Home() {
                     key={player.id}
                     name={player.name}
                     position={player.position}
-                    country={player.country}
-                    selected={swapFirst === player.id}
+                    country_code={player.country_code}
+                    selected={swapFirst?.id === player.id}
                     onClick={() => handlePlayerClick(player.id)}
                   />
                 ))}
@@ -229,13 +275,15 @@ export default function Home() {
       <p className="px-4 mt-5 mb-3 text-[17px] font-bold text-black">My Bench</p>
       <div className="flex gap-2 px-4 overflow-x-auto pb-1">
         {squad.bench.map(player => (
-          <PitchPlayerCard
-            key={player.id}
-            name={player.name}
-            position={player.position}
-            country={player.country}
-          />
-        ))}
+  <PitchPlayerCard
+    key={player.id}
+    name={player.name}
+    position={player.position}
+    country_code={player.country_code}
+    selected={swapFirst?.id === player.id}
+    onClick={() => handlePlayerClick(player.id, true)}
+  />
+))}
       </div>
 
       {/* ── Action buttons ── */}

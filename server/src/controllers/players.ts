@@ -31,7 +31,7 @@ export const getPlayers = async (req: Request, res: Response) => {
 
   try {
     const result = await pool.query(
-      `SELECT id, api_player_id, name, position, country, price, is_injured
+      `SELECT id, api_player_id, name, position, country, country_code, price, is_injured
        FROM players
        ${where}
        ORDER BY price DESC`,

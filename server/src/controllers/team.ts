@@ -152,7 +152,7 @@ export const getTeam = async (req: AuthRequest, res: Response) => {
     const team = teamResult.rows[0];
 
     const playersResult = await pool.query(
-      `SELECT p.id AS player_id ,p.name,p.position,p.country,p.price,p.is_injured,tp.is_captain,tp.is_on_bench,tp.purchase_price
+      `SELECT p.id AS player_id ,p.name,p.position,p.country,p.country_code,p.price,p.is_injured,tp.is_captain,tp.is_on_bench,tp.purchase_price
       FROM team_players tp
       JOIN  players p ON tp.player_id = p.id 
       WHERE  tp.team_id = $1`, [team.id]
@@ -163,5 +163,40 @@ export const getTeam = async (req: AuthRequest, res: Response) => {
   }catch(err){
     console.error(err)
     res.status(500).json({ error: 'Server error' })
+  }
+}
+
+export const updateTeamName = async (req: AuthRequest, res: Response) => {
+  const userId = req.userId;
+  const { name } = req.body;
+
+  if (!userId) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+
+  if (!name || !name.trim()) {
+    res.status(400).json({ error: 'Team name cannot be empty' });
+    return;
+  }
+
+  try {
+    const result = await pool.query(
+      `UPDATE teams 
+       SET name = $1 
+       WHERE user_id = $2 
+       RETURNING id, name, budget_remaining, total_points, created_at`,
+      [name.trim(), userId]
+    );
+
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'Team not found' });
+      return;
+    }
+
+    res.json({ team: result.rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
   }
 }

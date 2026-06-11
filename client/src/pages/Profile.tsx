@@ -1,6 +1,6 @@
 // pages/Profile.tsx
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 
@@ -9,25 +9,44 @@ interface Section {
   label: string
 }
 
-const SECTIONS: Section[] = [
-  { id: 'username', label: 'Username'  },
-  { id: 'teamname', label: 'Team Name' },
-  { id: 'password', label: 'Password'  },
-]
-
 export default function Profile() {
   const navigate = useNavigate()
-  const user = JSON.parse(localStorage.getItem('user') || '{}')
+  const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
 
+  const [user, setUser] = useState<{ username?: string, email?: string, teamName?: string }>(
+    {
+      username: storedUser?.username,
+      email: storedUser?.email,
+      teamName: storedUser?.teamName,
+    }
+  )
   const [open, setOpen]       = useState<Section['id'] | null>(null)
-  const [username, setUsername] = useState(user?.username || '')
-  const [teamname, setTeamname] = useState(user?.teamName || '')
+  const [username, setUsername] = useState(storedUser?.username || '')
+  const [teamname, setTeamname] = useState(storedUser?.teamName || '')
   const [currentPw, setCurrentPw] = useState('')
   const [newPw, setNewPw]         = useState('')
   const [confirmPw, setConfirmPw] = useState('')
   const [loading, setLoading]   = useState(false)
   const [success, setSuccess]   = useState<string | null>(null)
   const [error, setError]       = useState<string | null>(null)
+
+  useEffect(() => {
+    const loadTeam = async () => {
+      try {
+        const res = await api.get('/team')
+        const name = res.data.team?.name
+        if (name) {
+          setTeamname(name)
+          setUser(prev => ({ ...prev, teamName: name }))
+          localStorage.setItem('user', JSON.stringify({ ...storedUser, teamName: name }))
+        }
+      } catch (err) {
+        // Ignore missing team or auth errors here
+      }
+    }
+
+    loadTeam()
+  }, [])
 
   const toggle = (id: Section['id']) => {
     setOpen(prev => prev === id ? null : id)
@@ -45,8 +64,9 @@ export default function Profile() {
     if (!username.trim()) { setError('Username cannot be empty'); return }
     setLoading(true)
     try {
-      await api.patch('/user/username', { username })
+      await api.patch('/auth/user/username', { username })
       const updated = { ...user, username }
+      setUser(updated)
       localStorage.setItem('user', JSON.stringify(updated))
       showSuccess('Username updated!')
       setOpen(null)
@@ -61,6 +81,7 @@ export default function Profile() {
     try {
       await api.patch('/team/name', { name: teamname })
       const updated = { ...user, teamName: teamname }
+      setUser(updated)
       localStorage.setItem('user', JSON.stringify(updated))
       showSuccess('Team name updated!')
       setOpen(null)
@@ -75,7 +96,7 @@ export default function Profile() {
     if (newPw !== confirmPw) { setError('Passwords do not match'); return }
     setLoading(true)
     try {
-      await api.patch('/user/password', { currentPassword: currentPw, newPassword: newPw })
+      await api.patch('/auth/user/password', { currentPassword: currentPw, newPassword: newPw })
       showSuccess('Password updated!')
       setCurrentPw(''); setNewPw(''); setConfirmPw('')
       setOpen(null)

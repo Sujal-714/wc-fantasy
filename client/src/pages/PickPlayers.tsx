@@ -1,41 +1,25 @@
 // pages/PickPlayers.tsx
-
-import { useState, useMemo } from 'react'
+import { useState,useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import PlayerCard from '../components/Playercard'
+import PlayerCard from '../components/PlayerCard'
+import api from '../services/api'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type Position = 'FWD' | 'MID' | 'DEF' | 'GK'
 
 interface Player {
-  id: number
+   id: string   
   name: string
   position: Position
   country: string
-  price: number
+  country_code: string
+  price: number | string
 }
 
+const MOCK_PLAYERS: Player[] = [] // keep as fallback
+
 // ── Mock data (replace with real API call later) ───────────────────────────
-const MOCK_PLAYERS: Player[] = [
-  { id: 1,  name: 'C. Ronaldo',  position: 'FWD', country: 'PT', price: 12 },
-  { id: 2,  name: 'K. Benzema',  position: 'FWD', country: 'FR', price: 11 },
-  { id: 3,  name: 'H. Kane',     position: 'FWD', country: 'EN', price: 11 },
-  { id: 4,  name: 'K. Mbappé',   position: 'FWD', country: 'FR', price: 13 },
-  { id: 5,  name: 'L. Messi',    position: 'FWD', country: 'AR', price: 12 },
-  { id: 6,  name: 'K. De Bruyne',position: 'MID', country: 'BE', price: 12 },
-  { id: 7,  name: 'L. Modric',   position: 'MID', country: 'HR', price: 10 },
-  { id: 8,  name: 'T. Kroos',    position: 'MID', country: 'DE', price: 10 },
-  { id: 9,  name: 'B. Fernandes',position: 'MID', country: 'PT', price: 10 },
-  { id: 10, name: 'P. Foden',    position: 'MID', country: 'EN', price: 9  },
-  { id: 11, name: 'V. van Dijk', position: 'DEF', country: 'NL', price: 8  },
-  { id: 12, name: 'A. Robertson',position: 'DEF', country: 'SC', price: 7  },
-  { id: 13, name: 'T. Alexander-Arnold', position: 'DEF', country: 'EN', price: 8 },
-  { id: 14, name: 'R. Dias',     position: 'DEF', country: 'PT', price: 7  },
-  { id: 15, name: 'M. Acerbi',   position: 'DEF', country: 'IT', price: 6  },
-  { id: 16, name: 'A. Onana',    position: 'GK',  country: 'CM', price: 6  },
-  { id: 17, name: 'M. ter Stegen',position: 'GK', country: 'DE', price: 7  },
-  { id: 18, name: 'T. Courtois', position: 'GK',  country: 'BE', price: 8  },
-]
+
 
 // ── Limits per position ────────────────────────────────────────────────────
 const LIMITS: Record<Position, number> = {
@@ -61,57 +45,116 @@ export default function PickPlayers() {
   const navigate = useNavigate()
 
   const [search, setSearch]           = useState('')
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [filterOpen, setFilterOpen]   = useState(false)
   const [filterPosition, setFilterPosition] = useState<Position | 'ALL'>('ALL')
   const [filterCountry, setFilterCountry]   = useState('')
+  const [players, setPlayers] = useState<Player[]>(MOCK_PLAYERS)
+
+  useEffect(() => {
+    const fetchPlayers = async () => {
+      try {
+        const res = await api.get('/players')
+        setPlayers(res.data.players.map((player: any) => ({
+          ...player,
+          country_code: player.country_code || String(player.country || '').slice(0, 2).toUpperCase(),
+        })))
+      } catch {
+        setPlayers(MOCK_PLAYERS)
+      }
+    }
+    fetchPlayers()
+  }, [])
 
   // Budget
   const spent = useMemo(() => {
-    return MOCK_PLAYERS
+    return players
       .filter(p => selectedIds.has(p.id))
-      .reduce((sum, p) => sum + p.price, 0)
-  }, [selectedIds])
+      .reduce((sum, p) => sum + parseFloat(String(p.price)), 0)
+  }, [selectedIds,players])
   const budgetLeft = TOTAL_BUDGET - spent
 
   // Picked counts per position
   const pickedCounts = useMemo(() => {
     const counts: Record<Position, number> = { FWD: 0, MID: 0, DEF: 0, GK: 0 }
-    MOCK_PLAYERS
+   players
       .filter(p => selectedIds.has(p.id))
       .forEach(p => { counts[p.position]++ })
     return counts
-  }, [selectedIds])
+  }, [selectedIds,players])
 
   // Filtered player list
   const filtered = useMemo(() => {
-    return MOCK_PLAYERS.filter(p => {
+    return players.filter(p => {
       const matchSearch = p.name.toLowerCase().includes(search.toLowerCase())
       const matchPos    = filterPosition === 'ALL' || p.position === filterPosition
       const matchCntry  = !filterCountry || p.country.toLowerCase().includes(filterCountry.toLowerCase())
       return matchSearch && matchPos && matchCntry
     })
-  }, [search, filterPosition, filterCountry])
+  }, [search, filterPosition, filterCountry,players])
 
   // Toggle select / deselect
-  const handleToggle = (id: number) => {
-    const player = MOCK_PLAYERS.find(p => p.id === id)!
+  const handleToggle = (id: string) => {
+    const player = players.find(p => p.id === id)!
+    console.log('position:', player.position)
+  console.log('pickedCounts:', pickedCounts)
+  console.log('limit:', LIMITS[player.position])
+  console.log('budgetLeft:', budgetLeft)
     const next = new Set(selectedIds)
 
     if (next.has(id)) {
       next.delete(id)
     } else {
       if (pickedCounts[player.position] >= LIMITS[player.position]) return
-      if (budgetLeft < player.price) return
+      if (budgetLeft < parseFloat(String(player.price))) return
       next.add(id)
     }
     setSelectedIds(next)
   }
 
-  const handleNext = () => {
-    // TODO: pass selectedIds to next screen / API
-    navigate('/build')
+ const handleNext = async () => {
+  if (selectedIds.size !== 15) {
+    alert(`Select ${15 - selectedIds.size} more players`)
+    return
   }
+
+  const teamName = localStorage.getItem('pendingTeamName') || 'My Team'
+  const selectedPlayers = players.filter(p => selectedIds.has(p.id))
+
+
+  // Group by position
+  const byPosition: Record<Position, Player[]> = { FWD: [], MID: [], DEF: [], GK: [] }
+  selectedPlayers.forEach(p => byPosition[p.position].push(p))
+
+  // Bench = last of each position group
+  const benchIds = new Set<string>([
+    byPosition.GK[byPosition.GK.length - 1]?.id,
+    byPosition.DEF[byPosition.DEF.length - 1]?.id,
+    byPosition.MID[byPosition.MID.length - 1]?.id,
+    byPosition.FWD[byPosition.FWD.length - 1]?.id,
+  ].filter(Boolean))
+
+  // Captain = first FWD (or first player if no FWD)
+  const captain = byPosition.FWD[0] || selectedPlayers[0]
+
+
+const payload = {
+  name: teamName,
+  players: selectedPlayers.map(p => ({
+    player_id: p.id,
+    is_captain: p.id === captain.id,  // ← use captain variable
+    is_on_bench: benchIds.has(p.id),  
+  }))
+}
+
+  try {
+    await api.post('/team', payload)
+    localStorage.removeItem('pendingTeamName')
+    navigate('/')
+  } catch (err: any) {
+    alert(err.response?.data?.error || 'Failed to save team')
+  }
+}
 
   return (
     <div
