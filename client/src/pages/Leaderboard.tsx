@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar'
-
+import api from '../services/api'
 // ── Types ──────────────────────────────────────────────────────────────────
 interface LeaderboardEntry {
   rank: number
@@ -95,16 +95,27 @@ function DotSeparator() {
 export default function Leaderboard() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([])
   const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    // TODO: replace with real API call
-    // const res = await api.get('/leaderboard')
-    // setEntries(res.data)
-    setTimeout(() => {
+useEffect(() => {
+  const fetchLeaderboard = async () => {
+    try {
+      const res = await api.get('/leaderboard')
+      const user = JSON.parse(localStorage.getItem('user') || '{}')
+      const mapped = res.data.leaderboard.map((row: any) => ({
+        rank: Number(row.rank),
+        teamName: row.team_name,
+        username: row.username,
+        points: row.total_points,
+        isCurrentUser: row.username === user.username,
+      }))
+      setEntries(mapped)
+    } catch {
       setEntries(MOCK_LEADERBOARD)
+    } finally {
       setLoading(false)
-    }, 400)
-  }, [])
+    }
+  }
+  fetchLeaderboard()
+}, [])
 
   // Build display list with dot separators between rank gaps
   const renderList = () => {

@@ -1,9 +1,10 @@
 import { Router } from 'express'
 import { authenticate } from '../middleware/auth'
-import { createTeam, getTeam } from '../controllers/team'
+import { createTeam, getTeam, updateTeamName } from '../controllers/team'
 const router = Router()
 
 router.post('/', authenticate, createTeam)
 router.get('/',authenticate,getTeam)
+router.patch('/name', authenticate, updateTeamName)
 
 export default router

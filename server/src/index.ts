@@ -1,3 +1,4 @@
+import cors from 'cors';
 import express from 'express'
 import { config } from './config'
 import pool from './db'
@@ -8,8 +9,13 @@ import playersRouter from './routes/players'
 import transferRouter from './routes/transfer'
 import { scoreMatches } from './jobs/scoreMatches' 
 import leaderboardRouter from './routes/leaderboard'
+import matchesRouter from './routes/matches'
 
 const app = express()
+
+// Enable CORS for all requests
+app.use(cors());
+
 app.use(express.json())
 
 app.use('/auth', authRouter);
@@ -17,6 +23,7 @@ app.use('/team/transfer', transferRouter);
 app.use('/team', teamRouter);
 app.use('/players', playersRouter);
 app.use('/leaderboard', leaderboardRouter)
+app.use('/matches', matchesRouter)
 
 //Runs every day at 11pm 
 cron.schedule('0 23 * * *', async () => {

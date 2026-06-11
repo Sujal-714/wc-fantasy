@@ -99,3 +99,104 @@ export const login = async (req: Request, res: Response) => {
   }
 }
 
+// ─── UPDATE USERNAME ────────────────────────────────────────
+export const updateUsername = async (req: any, res: Response) => {
+  const userId = req.userId
+  const { username } = req.body
+
+  if (!userId) {
+    res.status(401).json({ error: 'Unauthorized' })
+    return
+  }
+
+  if (!username || !username.trim()) {
+    res.status(400).json({ error: 'Username cannot be empty' })
+    return
+  }
+
+  try {
+    const result = await pool.query(
+      `UPDATE users 
+       SET username = $1 
+       WHERE id = $2 
+       RETURNING id, email, username, created_at`,
+      [username.trim(), userId]
+    )
+
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'User not found' })
+      return
+    }
+
+    res.json({ user: result.rows[0] })
+  } catch (err: any) {
+    // Postgres error code 23505 = unique constraint violation
+    if (err.code === '23505') {
+      res.status(409).json({ error: 'Username already taken' })
+      return
+    }
+    console.error(err)
+    res.status(500).json({ error: 'Server error' })
+  }
+}
+
+// ─── UPDATE PASSWORD ────────────────────────────────────────
+export const updatePassword = async (req: any, res: Response) => {
+  const userId = req.userId
+  const { currentPassword, newPassword } = req.body
+
+  if (!userId) {
+    res.status(401).json({ error: 'Unauthorized' })
+    return
+  }
+
+  if (!currentPassword || !newPassword) {
+    res.status(400).json({ error: 'Current and new password are required' })
+    return
+  }
+
+  if (newPassword.length < 6) {
+    res.status(400).json({ error: 'New password must be at least 6 characters' })
+    return
+  }
+
+  try {
+    // Fetch current user
+    const userResult = await pool.query(
+      'SELECT * FROM users WHERE id = $1',
+      [userId]
+    )
+
+    if (userResult.rows.length === 0) {
+      res.status(404).json({ error: 'User not found' })
+      return
+    }
+
+    const user = userResult.rows[0]
+
+    // Verify current password
+    const valid = await bcrypt.compare(currentPassword, user.password_hash)
+    if (!valid) {
+      res.status(401).json({ error: 'Current password is incorrect' })
+      return
+    }
+
+    // Hash new password
+    const password_hash = await bcrypt.hash(newPassword, 10)
+
+    // Update password
+    const updateResult = await pool.query(
+      `UPDATE users 
+       SET password_hash = $1 
+       WHERE id = $2 
+       RETURNING id, email, username, created_at`,
+      [password_hash, userId]
+    )
+
+    res.json({ user: updateResult.rows[0] })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Server error' })
+  }
+}
+

@@ -10,5 +10,6 @@ const required = (key: string): string => {
 export const config = {
   database_url: required('DATABASE_URL'),
   jwt_secret:   required('JWT_SECRET'),
+  rapidapi_key: required('RAPIDAPI_KEY'),
   port:         Number(process.env.PORT) || 3000,
 }

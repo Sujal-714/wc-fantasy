@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import api from '../services/api'
+
 
 export default function TeamName() {
   const navigate = useNavigate()
@@ -9,17 +9,9 @@ export default function TeamName() {
   const [loading, setLoading]   = useState(false)
 
   const handleNext = async () => {
-    if (!teamName.trim()) { setError('Please enter a team name'); return }
-    setLoading(true)
-    setError('')
-    try {
-      await api.post('/team/name', { name: teamName })
-      navigate('/pick')
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Something went wrong')
-    } finally {
-      setLoading(false)
-    }
+      if (!teamName.trim()) { setError('Please enter a team name'); return }
+         localStorage.setItem('pendingTeamName', teamName)
+        navigate('/build')
   }
 
   return (

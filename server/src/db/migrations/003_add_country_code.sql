@@ -1,0 +1,76 @@
+-- Add country_code column to players table
+-- ISO 3166-1 alpha-2 country codes (e.g., 'JP', 'BR', 'US')
+ALTER TABLE players 
+ADD COLUMN country_code VARCHAR(2);
+
+-- Populate country_code from country names using a mapping
+UPDATE players SET country_code = 
+  CASE country
+    WHEN 'Japan' THEN 'JP'
+    WHEN 'Brazil' THEN 'BR'
+    WHEN 'United States' THEN 'US'
+    WHEN 'Germany' THEN 'DE'
+    WHEN 'France' THEN 'FR'
+    WHEN 'England' THEN 'EN'
+    WHEN 'Spain' THEN 'ES'
+    WHEN 'Italy' THEN 'IT'
+    WHEN 'Argentina' THEN 'AR'
+    WHEN 'Mexico' THEN 'MX'
+    WHEN 'Canada' THEN 'CA'
+    WHEN 'Netherlands' THEN 'NL'
+    WHEN 'Belgium' THEN 'BE'
+    WHEN 'Portugal' THEN 'PT'
+    WHEN 'Greece' THEN 'GR'
+    WHEN 'Poland' THEN 'PL'
+    WHEN 'Turkey' THEN 'TR'
+    WHEN 'Russia' THEN 'RU'
+    WHEN 'Ukraine' THEN 'UA'
+    WHEN 'Sweden' THEN 'SE'
+    WHEN 'Norway' THEN 'NO'
+    WHEN 'Denmark' THEN 'DK'
+    WHEN 'Austria' THEN 'AT'
+    WHEN 'Switzerland' THEN 'CH'
+    WHEN 'Czech Republic' THEN 'CZ'
+    WHEN 'Hungary' THEN 'HU'
+    WHEN 'Romania' THEN 'RO'
+    WHEN 'Serbia' THEN 'RS'
+    WHEN 'Croatia' THEN 'HR'
+    WHEN 'Slovenia' THEN 'SI'
+    WHEN 'Slovakia' THEN 'SK'
+    WHEN 'Ireland' THEN 'IE'
+    WHEN 'Scotland' THEN 'SC'
+    WHEN 'Wales' THEN 'WL'
+    WHEN 'Australia' THEN 'AU'
+    WHEN 'New Zealand' THEN 'NZ'
+    WHEN 'China' THEN 'CN'
+    WHEN 'India' THEN 'IN'
+    WHEN 'South Korea' THEN 'KR'
+    WHEN 'Japan' THEN 'JP'
+    WHEN 'Iran' THEN 'IR'
+    WHEN 'Saudi Arabia' THEN 'SA'
+    WHEN 'United Arab Emirates' THEN 'AE'
+    WHEN 'Egypt' THEN 'EG'
+    WHEN 'Morocco' THEN 'MA'
+    WHEN 'Tunisia' THEN 'TN'
+    WHEN 'Ghana' THEN 'GH'
+    WHEN 'Ivory Coast' THEN 'CI'
+    WHEN 'Senegal' THEN 'SN'
+    WHEN 'South Africa' THEN 'ZA'
+    WHEN 'Nigeria' THEN 'NG'
+    WHEN 'Colombia' THEN 'CO'
+    WHEN 'Uruguay' THEN 'UY'
+    WHEN 'Chile' THEN 'CL'
+    WHEN 'Peru' THEN 'PE'
+    WHEN 'Ecuador' THEN 'EC'
+    WHEN 'Venezuela' THEN 'VE'
+    WHEN 'Paraguay' THEN 'PY'
+    WHEN 'Costa Rica' THEN 'CR'
+    WHEN 'Panama' THEN 'PA'
+    WHEN 'Jamaica' THEN 'JM'
+    WHEN 'Trinidad and Tobago' THEN 'TT'
+    ELSE SUBSTRING(country, 1, 2)  -- Fallback: first 2 letters uppercase
+  END;
+
+-- Make it NOT NULL after populating
+ALTER TABLE players 
+ALTER COLUMN country_code SET NOT NULL;

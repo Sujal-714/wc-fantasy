@@ -3,7 +3,8 @@
 interface PitchPlayerCardProps {
   name: string
   position: 'FWD' | 'MID' | 'DEF' | 'GK'
-  country: string
+  country?: string
+  country_code?: string
   selected?: boolean
   onClick?: () => void
 }
@@ -19,9 +20,13 @@ export default function PitchPlayerCard({
   name,
   position,
   country,
+  country_code,
   selected = false,
   onClick,
 }: PitchPlayerCardProps) {
+  const raw = country_code || country || ''
+  const code = raw.slice(0, 2).toUpperCase()
+
   return (
     <button
       onClick={onClick}
@@ -36,7 +41,7 @@ export default function PitchPlayerCard({
         </span>
         {/* Country flag placeholder */}
         <span className="text-[9px] bg-gray-100 rounded-sm px-0.5 font-semibold text-gray-500">
-          {country}
+          {code}
         </span>
       </div>
 
