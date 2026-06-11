@@ -129,3 +129,39 @@ export const createTeam = async (req: AuthRequest, res: Response) => {
     client.release()
   }
 }
+
+export const getTeam = async (req: AuthRequest, res: Response) => {
+  const userId = req.userId;
+
+  if (!userId) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+
+  try{
+    const teamResult = await pool.query(
+      `SELECT id, name, budget_remaining, total_points, created_at
+       FROM teams 
+      WHERE user_id = $1`,
+      [userId]
+    )
+    if (teamResult.rows.length === 0) {
+      res.status(404).json({ error: 'Team not found' });
+      return;
+    }
+    const team = teamResult.rows[0];
+
+    const playersResult = await pool.query(
+      `SELECT p.id AS player_id ,p.name,p.position,p.country,p.price,p.is_injured,tp.is_captain,tp.is_on_bench,tp.purchase_price
+      FROM team_players tp
+      JOIN  players p ON tp.player_id = p.id 
+      WHERE  tp.team_id = $1`, [team.id]
+    )
+    const players = playersResult.rows;
+
+    res.json({team,players})
+  }catch(err){
+    console.error(err)
+    res.status(500).json({ error: 'Server error' })
+  }
+}
