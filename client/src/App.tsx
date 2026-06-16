@@ -10,6 +10,7 @@ import Leaderboard from './pages/Leaderboard'
 import Market from './pages/Market'
 import SelectReplacement from './pages/SelectReplacement'
 import Profile from './pages/Profile'
+import Admin from './pages/Admin'
 
 import MatchPoints from './pages/MatchPoints'
 
@@ -35,6 +36,8 @@ export default function App() {
       <Route path="/profile"             element={<PrivateRoute><Profile /></PrivateRoute>} />
       <Route path="/select-replacement"  element={<PrivateRoute><SelectReplacement /></PrivateRoute>} />
       <Route path="/points/:id"          element={<PrivateRoute><MatchPoints /></PrivateRoute>} />
+      <Route path="/admin" element={<PrivateRoute><Admin /></PrivateRoute>} />
+
       <Route path="*"                    element={<Navigate to="/login" />} />
     </Routes>
   </div>
