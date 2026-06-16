@@ -10,6 +10,7 @@ import transferRouter from './routes/transfer'
 import { scoreMatches } from './jobs/scoreMatches' 
 import leaderboardRouter from './routes/leaderboard'
 import matchesRouter from './routes/matches'
+import adminRouter from './routes/admin'
 
 const app = express()
 
@@ -24,6 +25,7 @@ app.use('/team', teamRouter);
 app.use('/players', playersRouter);
 app.use('/leaderboard', leaderboardRouter)
 app.use('/matches', matchesRouter)
+app.use('/admin', adminRouter)
 
 //Runs every day at 11pm 
 cron.schedule('0 23 * * *', async () => {
