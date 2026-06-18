@@ -1,14 +1,17 @@
 import { Router } from 'express'
 import { extractStatsFromUrl, extractStatsAuto, submitMatchStats } from '../controllers/admin'
-import { authenticate } from '../middleware/auth'
 import { requireAdmin } from '../middleware/requireAdmin'
+import { scoreMatches } from '../jobs/scoreMatches'
 
 const router = Router()
 
 router.use(requireAdmin)
+router.post('/extract-stats-url', extractStatsFromUrl)
+router.post('/extract-stats-auto', extractStatsAuto)
+router.post('/matches/:matchId/stats', submitMatchStats)
+router.post('/score', async (req, res) => {
+  await scoreMatches()
+  res.json({ message: 'Scoring job ran' })
+})
 
-router.post('/extract-stats-url', authenticate, extractStatsFromUrl)
-router.post('/extract-stats-auto', authenticate, extractStatsAuto)
-router.post('/matches/:matchId/stats', authenticate, submitMatchStats)
-
-export default router
+export default router;

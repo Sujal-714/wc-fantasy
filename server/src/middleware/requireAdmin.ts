@@ -13,7 +13,7 @@ export const requireAdmin = (req: any, res: Response, next: NextFunction) => {
 
   try {
     const decoded: any = jwt.verify(token, config.jwt_secret)
-
+console.log('decoded:', decoded)
     if (!decoded.is_admin) {
       res.status(403).json({ error: 'Admin access only' })
       return

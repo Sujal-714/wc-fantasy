@@ -19,6 +19,10 @@ app.use(cors());
 
 app.use(express.json())
 
+app.use((req, res, next) => {
+  console.log('incoming:', req.method, req.path)
+  next()
+})
 app.use('/auth', authRouter);
 app.use('/team/transfer', transferRouter);
 app.use('/team', teamRouter);
@@ -32,10 +36,7 @@ cron.schedule('0 23 * * *', async () => {
   await scoreMatches()
 })
 
-app.post('/admin/score', async (req, res) => {
-  await scoreMatches()
-  res.json({ message: 'Scoring job ran' })
-})
+
 
 app.get('/health', async (req, res) => {
   try {
