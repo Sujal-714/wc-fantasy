@@ -28,7 +28,7 @@ export const register = async (req: Request, res: Response) => {
     const result = await pool.query(
       `INSERT INTO users (email, username, password_hash)
        VALUES ($1, $2, $3)
-       RETURNING id, email, username, created_at`,
+       RETURNING id, email, username, is_admin,created_at`,
       [email, username, password_hash]
     )
 
@@ -36,7 +36,7 @@ export const register = async (req: Request, res: Response) => {
 
     // Create JWT
     const token = jwt.sign(
-      { userId: user.id },      // payload — what you want to store in the token
+      { userId: user.id, is_admin: user.is_admin },      // payload — what you want to store in the token
       config.jwt_secret,
       { expiresIn: '7d' }       // token expires in 7 days
     )
@@ -84,7 +84,7 @@ export const login = async (req: Request, res: Response) => {
     }
 
     const token = jwt.sign(
-      { userId: user.id },
+      { userId: user.id, is_admin: user.is_admin},
       config.jwt_secret,
       { expiresIn: '7d' }
     )
