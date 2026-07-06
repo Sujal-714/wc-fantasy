@@ -6,7 +6,7 @@ export default function TeamName() {
   const navigate = useNavigate()
   const [teamName, setTeamName] = useState('')
   const [error, setError]       = useState('')
-  const [loading, setLoading]   = useState(false)
+  const [loading]   = useState(false)
 
   const handleNext = async () => {
       if (!teamName.trim()) { setError('Please enter a team name'); return }

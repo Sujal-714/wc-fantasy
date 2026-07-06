@@ -1,5 +1,5 @@
 // pages/Leaderboard.tsx
-
+import type { JSX } from 'react'
 import { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar'
 import api from '../services/api'
@@ -24,7 +24,7 @@ const MOCK_LEADERBOARD: LeaderboardEntry[] = [
 ]
 
 // ── Rank display ───────────────────────────────────────────────────────────
-function RankLabel({ rank, isTop3 }: { rank: number; isTop3: boolean }) {
+function RankLabel({ rank}: { rank: number}) {
   if (rank === 1) return <span className="text-lg">🥇</span>
   if (rank === 2) return <span className="text-lg">🥈</span>
   if (rank === 3) return <span className="text-lg">🥉</span>
@@ -54,7 +54,7 @@ function EntryCard({ entry }: { entry: LeaderboardEntry }) {
       {/* Rank */}
       <div className="w-10 flex items-center justify-center flex-shrink-0">
         {entry.rank <= 3 ? (
-          <RankLabel rank={entry.rank} isTop3={isTop3} />
+          <RankLabel rank={entry.rank} /*isTop3={isTop3}*/ />
         ) : (
           <span className="text-sm font-bold text-gray-400">
             {entry.rank === 100 ? '100' : '...'}
