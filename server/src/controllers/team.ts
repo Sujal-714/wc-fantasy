@@ -44,7 +44,7 @@ export const createTeam = async (req: AuthRequest, res: Response) => {
 
   // ── Budget check ────────────────────────────────────────
   const totalCost = dbPlayers.reduce((sum: number, p: any) => sum + parseFloat(p.price), 0)
-  if (totalCost > 100) {
+  if (totalCost > 120) {
     res.status(400).json({ error: `Squad costs $${totalCost.toFixed(1)}, exceeds $100 budget` })
     return
   }

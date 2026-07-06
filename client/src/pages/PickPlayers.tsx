@@ -29,7 +29,7 @@ const LIMITS: Record<Position, number> = {
   GK:  2,
 }
 
-const TOTAL_BUDGET = 100
+const TOTAL_BUDGET = 120
 
 const POSITIONS: Position[] = ['FWD', 'MID', 'DEF', 'GK']
 

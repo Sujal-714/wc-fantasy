@@ -2,7 +2,7 @@
 
 import { useNavigate } from 'react-router-dom'
 
-const BUDGET = 100.00
+const BUDGET = 120.00
 
 export default function BuildTeam() {
   const navigate = useNavigate()
