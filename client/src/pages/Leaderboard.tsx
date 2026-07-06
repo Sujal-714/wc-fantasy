@@ -40,7 +40,7 @@ function RankLabel({ rank}: { rank: number}) {
 
 // ── Entry card ─────────────────────────────────────────────────────────────
 function EntryCard({ entry }: { entry: LeaderboardEntry }) {
-  const isTop3 = entry.rank <= 3
+  // const isTop3 = entry.rank <= 3
 
   return (
     <div
