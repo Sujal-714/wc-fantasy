@@ -1,6 +1,6 @@
 import pool from '../db'
 import { calculatePoints } from '../utils/calculatePoints'
-import { getMatchStats } from '../services/apiFootball'
+
 
 export const scoreMatches = async () => {
   console.log('Scoring job started...')
