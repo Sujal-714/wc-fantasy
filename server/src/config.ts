@@ -10,6 +10,7 @@ const required = (key: string): string => {
 export const config = {
   database_url: required('DATABASE_URL'),
   jwt_secret:   required('JWT_SECRET'),
+  api_football_key: required('API_FOOTBALL_KEY'),
   port:   Number(process.env.PORT) || 3000,
   gemini_api_key: required('GEMINI_API_KEY'),
   serper_key: required('SERPER_API_KEY'),
