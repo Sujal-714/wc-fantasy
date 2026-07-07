@@ -39,7 +39,6 @@ export default function App() {
       <Route path="/select-replacement"  element={<PrivateRoute><SelectReplacement /></PrivateRoute>} />
       <Route path="/points/:id"          element={<PrivateRoute><MatchPoints /></PrivateRoute>} />
       <Route path="/admin" element={<PrivateRoute><Admin /></PrivateRoute>} />
-
       <Route path="*"                    element={<Navigate to="/login" />} />
     </Routes>
   </div>

@@ -15,7 +15,13 @@ import adminRouter from './routes/admin'
 const app = express()
 
 // Enable CORS for all requests
-app.use(cors());
+app.use(cors({
+  origin: [
+    'https://your-app.vercel.app',  // ← your Vercel URL
+    'http://localhost:5173',         // ← local dev
+  ],
+  credentials: true,
+}));
 
 app.use(express.json())
 
