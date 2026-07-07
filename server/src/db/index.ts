@@ -4,6 +4,9 @@ import {config} from '../config';
 
 const pool = new Pool({
   connectionString: config.database_url,
+   ssl: {
+    rejectUnauthorized: false  // ← required for Render PostgreSQL
+  }
 })
 
 // Test the connection on startup
