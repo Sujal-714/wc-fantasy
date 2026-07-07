@@ -17,7 +17,7 @@ const app = express()
 // Enable CORS for all requests
 app.use(cors({
   origin: [
-    'https://your-app.vercel.app',  // ← your Vercel URL
+    'https://wc-fantasy-navy.vercel.app',  // ← your Vercel URL
     'http://localhost:5173',         // ← local dev
   ],
   credentials: true,
