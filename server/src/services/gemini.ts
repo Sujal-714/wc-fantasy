@@ -3,6 +3,8 @@ import axios from 'axios'
 import * as cheerio from 'cheerio'
 import { config } from '../config'
 
+
+console.log('Gemini key starts with:', config.gemini_api_key?.slice(0, 8))
 const genAI = new GoogleGenerativeAI(config.gemini_api_key)
 const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite' })
 

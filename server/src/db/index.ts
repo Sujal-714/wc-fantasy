@@ -2,11 +2,11 @@ import { Pool } from 'pg'
 import {config} from '../config';
 
 
+const isProduction = process.env.NODE_ENV === 'production'
+
 const pool = new Pool({
   connectionString: config.database_url,
-   ssl: {
-    rejectUnauthorized: false  // ← required for Render PostgreSQL
-  }
+  ssl: isProduction ? { rejectUnauthorized: false } : false
 })
 
 // Test the connection on startup

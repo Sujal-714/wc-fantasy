@@ -217,13 +217,43 @@ export default function MatchPoints() {
 
   const [players, setPlayers] = useState<PlayerPoints[]>([])
   const [loading, setLoading] = useState(true)
+  const [total, setTotal]     = useState(0)  // ← add this
+
 
   useEffect(() => {
     // TODO: replace with api.get(`/points/match/${id}`)
-    setTimeout(() => { setPlayers(generateMockPlayers()); setLoading(false) }, 300)
+    const fetchPoints = async () => {
+    try {
+      const res = await api.get(`/matches/${id}/my-points`)
+      const mapped = res.data.players.map((p: any) => ({
+        id: p.player_id || Math.random(),
+        name: p.name,
+        position: p.position,
+        country: p.country,
+        stats: {
+          goals:            p.goals,
+          assists:          p.assists,
+          minutes_played:   p.minutes_played,
+          clean_sheet:      p.clean_sheet,
+          yellow_cards:     p.yellow_cards,
+          red_cards:        p.red_cards,
+          penalties_missed: p.penalties_missed,
+          saves:            p.saves,
+        },
+        points: p.fantasy_points,
+      }))
+      setPlayers(mapped)
+      setTotal(res.data.totalPoints)
+    } catch {
+      setPlayers(generateMockPlayers()) // fallback
+    } finally {
+      setLoading(false)
+    }
+  }
+  fetchPoints()
   }, [id])
 
-  const totalPoints = players.reduce((s, p) => s + p.points, 0)
+  // const totalPoints = players.reduce((s, p) => s + p.points, 0)
 
   const grouped = POSITIONS.reduce((acc, pos) => {
     acc[pos] = players.filter(p => p.position === pos)
@@ -270,7 +300,7 @@ export default function MatchPoints() {
         {/* Total points */}
         <div className="flex items-center justify-between">
           <p className="text-sm text-gray-500 font-medium">Your points this match</p>
-          <p className="text-[26px] font-bold text-black">{totalPoints} <span className="text-sm text-gray-400 font-medium">pts</span></p>
+          <p className="text-[26px] font-bold text-black">{total} <span className="text-sm text-gray-400 font-medium">pts</span></p>
         </div>
       </div>
 
