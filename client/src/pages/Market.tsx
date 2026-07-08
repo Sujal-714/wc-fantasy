@@ -72,7 +72,8 @@ export default function Market() {
           is_injured: p.is_injured,
         })))
 
-        setBudgetLeft(parseFloat(teamRes.data.team.budget_remaining))
+        const rawBudget = Number(teamRes.data.team.budget_remaining)
+        setBudgetLeft(Number.isFinite(rawBudget) ? Math.max(0, rawBudget) : 0)
 
         setSquadCounts({
           FWD: teamRes.data.players.filter((p: any) => p.position === 'FWD').length,
@@ -118,7 +119,7 @@ export default function Market() {
   }
 
   const currentRefund = selectedOutgoing ? calculateRefund(selectedOutgoing) : 0
-  const effectiveBudget = selectedOutgoing ? budgetLeft + currentRefund : budgetLeft
+  const effectiveBudget = Math.max(0, selectedOutgoing ? budgetLeft + currentRefund : budgetLeft)
 
   const handleSelectOutgoing = (player: Player) => {
     setSelectedOutgoing(player)

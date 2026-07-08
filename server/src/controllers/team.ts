@@ -2,6 +2,8 @@ import { Response } from 'express'
 import pool from '../db'
 import { AuthRequest } from '../middleware/auth'
 
+const TOTAL_BUDGET = 120
+
 export const createTeam = async (req: AuthRequest, res: Response) => {
   const userId = req.userId
   const { name, players } = req.body
@@ -44,8 +46,8 @@ export const createTeam = async (req: AuthRequest, res: Response) => {
 
   // ── Budget check ────────────────────────────────────────
   const totalCost = dbPlayers.reduce((sum: number, p: any) => sum + parseFloat(p.price), 0)
-  if (totalCost > 120) {
-    res.status(400).json({ error: `Squad costs $${totalCost.toFixed(1)}, exceeds $100 budget` })
+  if (totalCost > TOTAL_BUDGET) {
+    res.status(400).json({ error: `Squad costs $${totalCost.toFixed(1)}, exceeds $${TOTAL_BUDGET} budget` })
     return
   }
 
@@ -89,7 +91,7 @@ export const createTeam = async (req: AuthRequest, res: Response) => {
     }
 
     // Insert into teams
-    const budgetRemaining = parseFloat((100 - totalCost).toFixed(1))
+    const budgetRemaining = parseFloat((TOTAL_BUDGET - totalCost).toFixed(1))
     const teamResult = await client.query(
       `INSERT INTO teams (user_id, name, budget_remaining)
        VALUES ($1, $2, $3)
