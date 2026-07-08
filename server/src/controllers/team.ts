@@ -160,8 +160,13 @@ export const getTeam = async (req: AuthRequest, res: Response) => {
       WHERE  tp.team_id = $1`, [team.id]
     )
     const players = playersResult.rows;
+    const currentSpend = players.reduce((sum: number, player: any) => {
+      const purchasePrice = Number(player.purchase_price ?? player.price ?? 0)
+      return sum + (Number.isFinite(purchasePrice) ? purchasePrice : 0)
+    }, 0)
+    const normalizedBudget = Math.max(0, 120 - currentSpend)
 
-    res.json({team,players})
+    res.json({team: { ...team, budget_remaining: normalizedBudget }, players})
   }catch(err){
     console.error(err)
     res.status(500).json({ error: 'Server error' })

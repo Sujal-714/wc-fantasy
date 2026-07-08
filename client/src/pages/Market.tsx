@@ -19,6 +19,7 @@ interface Player {
 }
 
 const POSITIONS: Position[] = ['FWD', 'MID', 'DEF', 'GK']
+const INITIAL_BUDGET = 120
 
 const positionColors: Record<Position, string> = {
   FWD: '#ef4444',
@@ -61,7 +62,7 @@ export default function Market() {
 
         const teamIds = new Set(teamRes.data.players.map((p: any) => p.player_id))
 
-        setTeamPlayers(teamRes.data.players.map((p: any) => ({
+        const mappedPlayers = teamRes.data.players.map((p: any) => ({
           id: String(p.player_id),
           name: p.name,
           position: p.position,
@@ -70,10 +71,18 @@ export default function Market() {
           price: p.price,
           purchase_price: Number(p.purchase_price),
           is_injured: p.is_injured,
-        })))
+        }))
+
+        setTeamPlayers(mappedPlayers)
 
         const rawBudget = Number(teamRes.data.team.budget_remaining)
-        setBudgetLeft(Number.isFinite(rawBudget) ? Math.max(0, rawBudget) : 0)
+        const teamSpend = mappedPlayers.reduce((sum: number, player: Player) => {
+          const purchasePrice = Number(player.purchase_price ?? player.price ?? 0)
+          return sum + (Number.isFinite(purchasePrice) ? purchasePrice : 0)
+        }, 0)
+        const computedBudget = Math.max(0, INITIAL_BUDGET - teamSpend)
+        const fallbackBudget = Number.isFinite(rawBudget) ? Math.max(0, rawBudget) : 0
+        setBudgetLeft(Math.max(computedBudget, fallbackBudget))
 
         setSquadCounts({
           FWD: teamRes.data.players.filter((p: any) => p.position === 'FWD').length,
