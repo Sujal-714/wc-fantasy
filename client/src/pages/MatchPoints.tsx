@@ -244,7 +244,7 @@ export default function MatchPoints() {
       }))
       setPlayers(mapped)
       setTotal(res.data.totalPoints)
-    } catch {
+    } catch (err) {
        console.error('MatchPoints fetch error:', err)
       setPlayers(generateMockPlayers()) // fallback
     } finally {
