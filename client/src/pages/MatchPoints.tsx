@@ -1,5 +1,5 @@
 // pages/MatchPoints.tsx
-
+import api from '../services/api'
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 
