@@ -43,6 +43,7 @@ export const createTeam = async (req: AuthRequest, res: Response) => {
   }
 
   const dbPlayers = result.rows
+  console.log('dbPlayers:', dbPlayers)
 
   // ── Budget check ────────────────────────────────────────
   const totalCost = dbPlayers.reduce((sum: number, p: any) => sum + parseFloat(p.price), 0)
