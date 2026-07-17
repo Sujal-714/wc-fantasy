@@ -1,0 +1,48 @@
+services:
+
+ postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: wc_fantasy
+    ports:
+    - "5433:5432"
+    volumes:
+    - pgdata:/var/lib/postgresql/data
+    healthcheck:
+       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+       interval: 10s
+       timeout: 5s
+       retries: 5
+
+ backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "5010:3000"
+    env_file:
+      - ./server/.env.docker
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+  
+ frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        VITE_BASE_URL: http://localhost:5010
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+
+volumes:
+  pgdata:

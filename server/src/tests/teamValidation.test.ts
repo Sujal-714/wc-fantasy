@@ -1,8 +1,6 @@
 import {describe,it,expect} from 'vitest';
 import {validateSquadComposition} from '../utils/teamValidation';
 
-
-
 describe('validateSquadComposition',()=>{
     it('passes with a valid squad', ()=>{
         const dbPlayers =[

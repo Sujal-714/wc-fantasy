@@ -5,6 +5,7 @@ import { AuthRequest } from '../middleware/auth'
 const TOTAL_BUDGET = 120
 
 export const createTeam = async (req: AuthRequest, res: Response) => {
+  console.log(req);
   const userId = req.userId
   const { name, players } = req.body
 

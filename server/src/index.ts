@@ -12,13 +12,14 @@ import leaderboardRouter from './routes/leaderboard'
 import matchesRouter from './routes/matches'
 import adminRouter from './routes/admin'
 
-const app = express()
+export const app = express()
 
 // Enable CORS for all requests
 app.use(cors({
   origin: [
     'https://wc-fantasy-navy.vercel.app',  // ← your Vercel URL
-    'http://localhost:5173',         // ← local dev
+    'http://localhost:5173',
+     'http://localhost:8080',         // ← local dev
   ],
   credentials: true,
 }));
@@ -38,7 +39,11 @@ app.use('/matches', matchesRouter)
 app.use('/admin', adminRouter)
 
 //Runs every day at 11pm 
-cron.schedule('0 23 * * *', async () => {
+// cron.schedule('0 23 * * *', async () => {
+//   await scoreMatches()
+// })
+cron.schedule('8 17 * * *', async () => {
+  console.log('CRON FIRED — testing');
   await scoreMatches()
 })
 
@@ -53,6 +58,9 @@ app.get('/health', async (req, res) => {
   }
 })
 
+if (require.main === module) {
+
 app.listen(config.port, () => {
   console.log(`Server running on port ${config.port}`)
 })
+}
