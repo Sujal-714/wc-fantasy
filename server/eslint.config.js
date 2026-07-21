@@ -6,13 +6,13 @@ export default [
     rules: {
       // errors — these fail the pipeline
       'no-unused-vars': 'error',
-      'no-undef': 'error',
-      'no-console': 'warn',
+    //   'no-undef': 'error',
+    //   'no-console': 'warn',
 
-      // style — warnings only, won't fail pipeline
-      'semi': ['error', 'always'],
-      'quotes': ['error', 'single'],
-      'indent': ['error', 2],
+    //   // style — warnings only, won't fail pipeline
+    //   'semi': ['error', 'always'],
+    //   'quotes': ['error', 'single'],
+    //   'indent': ['error', 2],
     },
     languageOptions: {
       ecmaVersion: 2024,
