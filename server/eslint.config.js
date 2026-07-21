@@ -1,18 +1,12 @@
 import js from '@eslint/js';
+import tseslint from 'typescript-eslint';
 
-export default [
+export default tseslint.config(
   js.configs.recommended,
+  ...tseslint.configs.recommended,
   {
     rules: {
-      // errors — these fail the pipeline
       'no-unused-vars': 'error',
-    //   'no-undef': 'error',
-    //   'no-console': 'warn',
-
-    //   // style — warnings only, won't fail pipeline
-    //   'semi': ['error', 'always'],
-    //   'quotes': ['error', 'single'],
-    //   'indent': ['error', 2],
     },
     languageOptions: {
       ecmaVersion: 2024,
@@ -23,11 +17,13 @@ export default [
         Buffer: 'readonly',
         console: 'readonly',
       }
-    }},{
-    // ignore these folders
+    }
+  },
+  {
     ignores: [
       'node_modules/**',
       'dist/**',
-      '.env*']
+      '.env*'
+    ]
   }
-];
+);
