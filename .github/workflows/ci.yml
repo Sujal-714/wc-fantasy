@@ -104,6 +104,8 @@ jobs:
           DATABASE_URL: postgresql://postgres:admin@localhost:5432/wc_fantasy
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
         run: |
            node dist/index.js &
            sleep 5
