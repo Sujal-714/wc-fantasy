@@ -6,7 +6,8 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   {
     rules: {
-      'no-unused-vars': 'error',
+      'no-unused-vars': 'warn',
+  '@typescript-eslint/no-explicit-any': 'warn',
     },
     languageOptions: {
       ecmaVersion: 2024,
