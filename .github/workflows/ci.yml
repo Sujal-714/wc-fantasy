@@ -103,6 +103,7 @@ jobs:
           NODE_ENV: development
           DATABASE_URL: postgresql://postgres:admin@localhost:5432/wc_fantasy
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
         run: |
            node dist/index.js &
            sleep 5
